@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using WebShop.Models;
+using WebShop.Models.Models;
 
-namespace WebShop.Data;
+namespace WebShop.DataAccess.Data;
 
 public class ApplicationDbContext : DbContext
 {
