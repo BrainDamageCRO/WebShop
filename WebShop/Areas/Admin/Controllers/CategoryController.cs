@@ -4,8 +4,9 @@ using WebShop.DataAccess.Repository;
 using WebShop.DataAccess.Repository.IRepository;
 using WebShop.Models.Models;
 
-namespace WebShop.Controllers;
+namespace WebShop.Areas.Admin.Controllers;
 
+[Area("Admin")]
 public class CategoryController : Controller
 {
     // private readonly ICategoryRepository _categoryRepository;
@@ -47,7 +48,7 @@ public class CategoryController : Controller
             ModelState.AddModelError("Name", "The DisplayOrder cannot exactly match the Name.");
         }
 
-        if (ModelState.IsValid) 
+        if (ModelState.IsValid)
         {
             _unitOfWork.CategoryRepository.Add(category);
             _unitOfWork.Save();

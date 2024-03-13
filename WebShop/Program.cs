@@ -46,7 +46,7 @@ app.UseAuthorization();
 // Default route - if nothing is defined go to Home/Index/..
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
 // Runs the project
 app.Run();
