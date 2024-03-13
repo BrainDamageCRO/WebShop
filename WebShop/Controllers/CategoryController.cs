@@ -1,21 +1,35 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebShop.DataAccess.Data;
+using WebShop.DataAccess.Repository;
+using WebShop.DataAccess.Repository.IRepository;
 using WebShop.Models.Models;
 
 namespace WebShop.Controllers;
 
 public class CategoryController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    // private readonly ICategoryRepository _categoryRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CategoryController(ApplicationDbContext context)
+    //public CategoryController(ICategoryRepository categoryRepository)
+    //{
+    //    _categoryRepository = categoryRepository;
+    //}
+
+    public CategoryController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
+
+    //public IActionResult Index()
+    //{
+    //    List<Category> categoryList = _categoryRepository.GetAll().ToList();
+    //    return View(categoryList);
+    //}
 
     public IActionResult Index()
     {
-        List<Category> categoryList = _context.Categories.ToList();
+        List<Category> categoryList = _unitOfWork.CategoryRepository.GetAll().ToList();
         return View(categoryList);
     }
 
@@ -35,14 +49,15 @@ public class CategoryController : Controller
 
         if (ModelState.IsValid) 
         {
-            _context.Categories.Add(category);
-            _context.SaveChanges();
+            _unitOfWork.CategoryRepository.Add(category);
+            _unitOfWork.Save();
             TempData["success"] = "Category created successfully";
             return RedirectToAction("Index", "Category");
         }
 
         return View();
     }
+
 
     public IActionResult Edit(int? categoryId)
     {
@@ -51,9 +66,10 @@ public class CategoryController : Controller
             return NotFound();
         }
 
-        Category? category = _context.Categories.FirstOrDefault(c => c.Id == categoryId);
+        Category? category = _unitOfWork.CategoryRepository.Get(c => c.Id == categoryId);
         //Category? category1 = _context.Categories.Find(categoryId);
         //Category? category2 = _context.Categories.Where(c => c.Id == categoryId).FirstOrDefault();
+
 
         if (category == null)
         {
@@ -68,8 +84,8 @@ public class CategoryController : Controller
     {
         if (ModelState.IsValid)
         {
-            _context.Categories.Update(category);
-            _context.SaveChanges();
+            _unitOfWork.CategoryRepository.Update(category);
+            _unitOfWork.Save();
             TempData["success"] = "Category edited successfully";
             return RedirectToAction("Index", "Category");
         }
@@ -84,7 +100,7 @@ public class CategoryController : Controller
             return NotFound();
         }
 
-        Category? category = _context.Categories.FirstOrDefault(c => c.Id == categoryId);
+        Category? category = _unitOfWork.CategoryRepository.Get(c => c.Id == categoryId);
 
         if (category == null)
         {
@@ -97,15 +113,15 @@ public class CategoryController : Controller
     [HttpPost, ActionName("Delete")]
     public IActionResult DeletePOST(int? categoryId)
     {
-        Category? category = _context.Categories.FirstOrDefault(c => c.Id == categoryId);
+        Category? category = _unitOfWork.CategoryRepository.Get(c => c.Id == categoryId);
 
         if (category == null)
         {
             return NotFound();
         }
-        
-        _context.Categories.Remove(category);
-        _context.SaveChanges();
+
+        _unitOfWork.CategoryRepository.Delete(category);
+        _unitOfWork.Save();
         TempData["success"] = "Category deleted successfully";
 
         return RedirectToAction("Index", "Category");

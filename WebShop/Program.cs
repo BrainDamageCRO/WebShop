@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 
 using WebShop.DataAccess.Data;
+using WebShop.DataAccess.Repository;
+using WebShop.DataAccess.Repository.IRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,11 @@ builder.Services.AddControllersWithViews();
 // Add DbContext as a service with connection string from appsettings.json
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add Repository service
+// builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
 var app = builder.Build();
 
