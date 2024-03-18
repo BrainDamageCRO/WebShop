@@ -9,24 +9,12 @@ namespace WebShop.Areas.Admin.Controllers;
 [Area("Admin")]
 public class CategoryController : Controller
 {
-    // private readonly ICategoryRepository _categoryRepository;
     private readonly IUnitOfWork _unitOfWork;
-
-    //public CategoryController(ICategoryRepository categoryRepository)
-    //{
-    //    _categoryRepository = categoryRepository;
-    //}
 
     public CategoryController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
-
-    //public IActionResult Index()
-    //{
-    //    List<Category> categoryList = _categoryRepository.GetAll().ToList();
-    //    return View(categoryList);
-    //}
 
     public IActionResult Index()
     {
@@ -68,9 +56,6 @@ public class CategoryController : Controller
         }
 
         Category? category = _unitOfWork.CategoryRepository.Get(c => c.Id == categoryId);
-        //Category? category1 = _context.Categories.Find(categoryId);
-        //Category? category2 = _context.Categories.Where(c => c.Id == categoryId).FirstOrDefault();
-
 
         if (category == null)
         {
