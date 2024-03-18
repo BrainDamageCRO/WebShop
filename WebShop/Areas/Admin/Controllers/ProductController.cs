@@ -43,7 +43,7 @@ public class ProductController : Controller
             Product = new Product(),
         };
 
-        return View();
+        return View(productViewModel);
     }
 
     [HttpPost]
