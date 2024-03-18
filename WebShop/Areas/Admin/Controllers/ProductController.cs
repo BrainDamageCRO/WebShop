@@ -4,6 +4,7 @@ using WebShop.DataAccess.Data;
 using WebShop.DataAccess.Repository;
 using WebShop.DataAccess.Repository.IRepository;
 using WebShop.Models.Models;
+using WebShop.Models.ViewModels;
 
 namespace WebShop.Areas.Admin.Controllers;
 
@@ -33,23 +34,39 @@ public class ProductController : Controller
                 Value = c.Id.ToString()
             });
 
-        ViewBag.CategoryList = categoryList;
+        // ViewBag.CategoryList = categoryList;
+        // ViewData["CategoryList"] = categoryList;
+
+        ProductViewModel productViewModel = new ProductViewModel()
+        {
+            CategoryList = categoryList,
+            Product = new Product(),
+        };
 
         return View();
     }
 
     [HttpPost]
-    public IActionResult Create(Product product)
+    public IActionResult Create(ProductViewModel productViewModel)
     {
         if (ModelState.IsValid)
         {
-            _unitOfWork.ProductRepository.Add(product);
+            _unitOfWork.ProductRepository.Add(productViewModel.Product);
             _unitOfWork.Save();
             TempData["success"] = "Product created successfully";
+
             return RedirectToAction("Index", "Product");
         }
+        else
+        {
+            productViewModel.CategoryList = _unitOfWork.CategoryRepository.GetAll().Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString()
+            });
 
-        return View();
+            return View(productViewModel);
+        }
     }
 
 
