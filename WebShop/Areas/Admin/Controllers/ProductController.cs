@@ -12,10 +12,12 @@ namespace WebShop.Areas.Admin.Controllers;
 public class ProductController : Controller
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
-    public ProductController(IUnitOfWork unitOfWork)
+    public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
     {
         _unitOfWork = unitOfWork;
+        _webHostEnvironment = webHostEnvironment;
     }
 
     public IActionResult Index()
@@ -82,6 +84,21 @@ public class ProductController : Controller
     {
         if (ModelState.IsValid)
         {
+            string wwwRootPath = _webHostEnvironment.WebRootPath;
+
+            if (formFile != null)
+            {
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(formFile.FileName);
+                string productPath = Path.Combine(wwwRootPath, @"images\product");
+
+                using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                {
+                    formFile.CopyTo(fileStream);
+                }
+
+                productViewModel.Product.ImageUrl = @"images\product\" + fileName;
+            }
+
             _unitOfWork.ProductRepository.Add(productViewModel.Product);
             _unitOfWork.Save();
             TempData["success"] = "Product created successfully";
