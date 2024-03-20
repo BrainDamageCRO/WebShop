@@ -25,7 +25,28 @@ public class ProductController : Controller
         return View(productList);
     }
 
-    public IActionResult Create()
+    //public IActionResult Create()
+    //{
+    //    IEnumerable<SelectListItem> categoryList = _unitOfWork.CategoryRepository
+    //        .GetAll().Select(c => new SelectListItem
+    //        {
+    //            Text = c.Name,
+    //            Value = c.Id.ToString()
+    //        });
+
+    //    // ViewBag.CategoryList = categoryList;
+    //    // ViewData["CategoryList"] = categoryList;
+
+    //    ProductViewModel productViewModel = new ProductViewModel()
+    //    {
+    //        CategoryList = categoryList,
+    //        Product = new Product(),
+    //    };
+
+    //    return View(productViewModel);
+    //}
+
+    public IActionResult Upsert(int? productId)
     {
         IEnumerable<SelectListItem> categoryList = _unitOfWork.CategoryRepository
             .GetAll().Select(c => new SelectListItem
@@ -43,11 +64,21 @@ public class ProductController : Controller
             Product = new Product(),
         };
 
-        return View(productViewModel);
+        if (productId == null || productId == 0)
+        {
+            // Create
+            return View(productViewModel);
+        }
+        else
+        {
+            // Update
+            productViewModel.Product = _unitOfWork.ProductRepository.Get(p => p.Id == productId);
+            return View(productViewModel);
+        }
     }
 
     [HttpPost]
-    public IActionResult Create(ProductViewModel productViewModel)
+    public IActionResult Upsert(ProductViewModel productViewModel, IFormFile? formFile)
     {
         if (ModelState.IsValid)
         {
@@ -69,37 +100,60 @@ public class ProductController : Controller
         }
     }
 
+    //[HttpPost]
+    //public IActionResult Create(ProductViewModel productViewModel)
+    //{
+    //    if (ModelState.IsValid)
+    //    {
+    //        _unitOfWork.ProductRepository.Add(productViewModel.Product);
+    //        _unitOfWork.Save();
+    //        TempData["success"] = "Product created successfully";
 
-    public IActionResult Edit(int? productId)
-    {
-        if (productId is null or 0)
-        {
-            return NotFound();
-        }
+    //        return RedirectToAction("Index", "Product");
+    //    }
+    //    else
+    //    {
+    //        productViewModel.CategoryList = _unitOfWork.CategoryRepository.GetAll().Select(c => new SelectListItem
+    //        {
+    //            Text = c.Name,
+    //            Value = c.Id.ToString()
+    //        });
 
-        Product? product = _unitOfWork.ProductRepository.Get(c => c.Id == productId);
+    //        return View(productViewModel);
+    //    }
+    //}
 
-        if (product == null)
-        {
-            return NotFound();
-        }
+    // We don't need those anymore since we are going to use one method for both Create and Edit
+    //public IActionResult Edit(int? productId)
+    //{
+    //    if (productId is null or 0)
+    //    {
+    //        return NotFound();
+    //    }
 
-        return View(product);
-    }
+    //    Product? product = _unitOfWork.ProductRepository.Get(c => c.Id == productId);
 
-    [HttpPost]
-    public IActionResult Edit(Product product)
-    {
-        if (ModelState.IsValid)
-        {
-            _unitOfWork.ProductRepository.Update(product);
-            _unitOfWork.Save();
-            TempData["success"] = "Product edited successfully";
-            return RedirectToAction("Index", "Product");
-        }
+    //    if (product == null)
+    //    {
+    //        return NotFound();
+    //    }
 
-        return View();
-    }
+    //    return View(product);
+    //}
+
+    //[HttpPost]
+    //public IActionResult Edit(Product product)
+    //{
+    //    if (ModelState.IsValid)
+    //    {
+    //        _unitOfWork.ProductRepository.Update(product);
+    //        _unitOfWork.Save();
+    //        TempData["success"] = "Product edited successfully";
+    //        return RedirectToAction("Index", "Product");
+    //    }
+
+    //    return View();
+    //}
 
     public IActionResult Delete(int? productId)
     {
