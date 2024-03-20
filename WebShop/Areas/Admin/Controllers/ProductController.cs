@@ -91,6 +91,18 @@ public class ProductController : Controller
                 string fileName = Guid.NewGuid().ToString() + Path.GetExtension(formFile.FileName);
                 string productPath = Path.Combine(wwwRootPath, @"images\product");
 
+                // Check if we need to delete the image first
+                if (!string.IsNullOrEmpty(productViewModel.Product.ImageUrl))
+                {
+                    var oldImagePath = Path.Combine(wwwRootPath, productViewModel.Product.ImageUrl.Trim('\\'));
+
+                    // Check if exists first always
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                }
+
                 using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
                 {
                     formFile.CopyTo(fileStream);
@@ -99,9 +111,18 @@ public class ProductController : Controller
                 productViewModel.Product.ImageUrl = @"images\product\" + fileName;
             }
 
-            _unitOfWork.ProductRepository.Add(productViewModel.Product);
+            if (productViewModel.Product.Id == 0)
+            {
+                _unitOfWork.ProductRepository.Add(productViewModel.Product);
+                TempData["success"] = "Product created successfully";
+            }
+            else
+            {
+                _unitOfWork.ProductRepository.Update(productViewModel.Product);
+                TempData["success"] = "Product updated successfully";
+            }
+            
             _unitOfWork.Save();
-            TempData["success"] = "Product created successfully";
 
             return RedirectToAction("Index", "Product");
         }
