@@ -108,7 +108,7 @@ public class ProductController : Controller
                     formFile.CopyTo(fileStream);
                 }
 
-                productViewModel.Product.ImageUrl = @"images\product\" + fileName;
+                productViewModel.Product.ImageUrl = @"\images\product\" + fileName;
             }
 
             if (productViewModel.Product.Id == 0)
