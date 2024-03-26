@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WebShop.DataAccess.Data;
 using WebShop.DataAccess.Repository;
 using WebShop.DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddControllersWithViews();
 // Add DbContext as a service with connection string from appsettings.json
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Add Repository service
 // builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -41,6 +44,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // This is something we will work on later
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Default route - if nothing is defined go to Home/Index/..
