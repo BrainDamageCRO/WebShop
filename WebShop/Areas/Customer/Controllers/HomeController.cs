@@ -23,6 +23,12 @@ public class HomeController : Controller
         return View(productList);
     }
 
+    public IActionResult Details(int productId)
+    {
+        Product product = _unitOfWork.ProductRepository.Get(p => p.Id == productId, includeProperties: "Category");
+        return View(product);
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
