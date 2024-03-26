@@ -22,33 +22,12 @@ public class ProductController : Controller
 
     public IActionResult Index()
     {
-        List<Product> productList = _unitOfWork.ProductRepository.GetAll().ToList();
+        List<Product> productList = _unitOfWork.ProductRepository.GetAll(includeProperties: "Category").ToList();
 
         return View(productList);
     }
 
-    //public IActionResult Create()
-    //{
-    //    IEnumerable<SelectListItem> categoryList = _unitOfWork.CategoryRepository
-    //        .GetAll().Select(c => new SelectListItem
-    //        {
-    //            Text = c.Name,
-    //            Value = c.Id.ToString()
-    //        });
-
-    //    // ViewBag.CategoryList = categoryList;
-    //    // ViewData["CategoryList"] = categoryList;
-
-    //    ProductViewModel productViewModel = new ProductViewModel()
-    //    {
-    //        CategoryList = categoryList,
-    //        Product = new Product(),
-    //    };
-
-    //    return View(productViewModel);
-    //}
-
-    public IActionResult Upsert(int? productId)
+    public IActionResult Upsert(int? id)
     {
         IEnumerable<SelectListItem> categoryList = _unitOfWork.CategoryRepository
             .GetAll().Select(c => new SelectListItem
@@ -66,7 +45,7 @@ public class ProductController : Controller
             Product = new Product(),
         };
 
-        if (productId == null || productId == 0)
+        if (id == null || id == 0)
         {
             // Create
             return View(productViewModel);
@@ -74,7 +53,7 @@ public class ProductController : Controller
         else
         {
             // Update
-            productViewModel.Product = _unitOfWork.ProductRepository.Get(p => p.Id == productId);
+            productViewModel.Product = _unitOfWork.ProductRepository.Get(p => p.Id == id);
             return View(productViewModel);
         }
     }
@@ -138,31 +117,7 @@ public class ProductController : Controller
         }
     }
 
-    //[HttpPost]
-    //public IActionResult Create(ProductViewModel productViewModel)
-    //{
-    //    if (ModelState.IsValid)
-    //    {
-    //        _unitOfWork.ProductRepository.Add(productViewModel.Product);
-    //        _unitOfWork.Save();
-    //        TempData["success"] = "Product created successfully";
-
-    //        return RedirectToAction("Index", "Product");
-    //    }
-    //    else
-    //    {
-    //        productViewModel.CategoryList = _unitOfWork.CategoryRepository.GetAll().Select(c => new SelectListItem
-    //        {
-    //            Text = c.Name,
-    //            Value = c.Id.ToString()
-    //        });
-
-    //        return View(productViewModel);
-    //    }
-    //}
-
-    // We don't need those anymore since we are going to use one method for both Create and Edit
-    //public IActionResult Edit(int? productId)
+    //public IActionResult Delete(int? productId)
     //{
     //    if (productId is null or 0)
     //    {
@@ -179,51 +134,52 @@ public class ProductController : Controller
     //    return View(product);
     //}
 
-    //[HttpPost]
-    //public IActionResult Edit(Product product)
+    //[HttpPost, ActionName("Delete")]
+    //public IActionResult DeletePOST(int? productId)
     //{
-    //    if (ModelState.IsValid)
+    //    Product? product = _unitOfWork.ProductRepository.Get(c => c.Id == productId);
+
+    //    if (product == null)
     //    {
-    //        _unitOfWork.ProductRepository.Update(product);
-    //        _unitOfWork.Save();
-    //        TempData["success"] = "Product edited successfully";
-    //        return RedirectToAction("Index", "Product");
+    //        return NotFound();
     //    }
 
-    //    return View();
+    //    _unitOfWork.ProductRepository.Delete(product);
+    //    _unitOfWork.Save();
+    //    TempData["success"] = "Product deleted successfully";
+
+    //    return RedirectToAction("Index", "Product");
     //}
 
-    public IActionResult Delete(int? productId)
+    #region API Calls
+    [HttpGet]
+    public IActionResult GetAll()
     {
-        if (productId is null or 0)
-        {
-            return NotFound();
-        }
-
-        Product? product = _unitOfWork.ProductRepository.Get(c => c.Id == productId);
-
-        if (product == null)
-        {
-            return NotFound();
-        }
-
-        return View(product);
+        List<Product> productList = _unitOfWork.ProductRepository.GetAll(includeProperties: "Category").ToList();
+        return Json(new { data = productList });
     }
 
-    [HttpPost, ActionName("Delete")]
-    public IActionResult DeletePOST(int? productId)
+    [HttpDelete]
+    public IActionResult Delete(int? id)
     {
-        Product? product = _unitOfWork.ProductRepository.Get(c => c.Id == productId);
+        var product = _unitOfWork.ProductRepository.Get(p => p.Id == id);
 
         if (product == null)
         {
-            return NotFound();
+            return Json(new { success = false, message = "Error while deleting" });
+        }
+
+        var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, product.ImageUrl.Trim('\\'));
+
+        if (System.IO.File.Exists(oldImagePath))
+        {
+            System.IO.File.Delete(oldImagePath);
         }
 
         _unitOfWork.ProductRepository.Delete(product);
         _unitOfWork.Save();
-        TempData["success"] = "Product deleted successfully";
 
-        return RedirectToAction("Index", "Product");
+        return Json(new { success = true, message = "Delete Successful" });
     }
+    #endregion
 }
