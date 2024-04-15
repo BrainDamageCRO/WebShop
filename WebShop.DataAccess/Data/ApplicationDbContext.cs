@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     // Always use plural here
     public DbSet<Category> Categories { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
     // Seed data here (there are other ways of doing this)
     protected override void OnModelCreating(ModelBuilder modelBuilder)

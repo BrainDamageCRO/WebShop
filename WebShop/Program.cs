@@ -1,24 +1,31 @@
 using Microsoft.EntityFrameworkCore;
-
 using WebShop.DataAccess.Data;
 using WebShop.DataAccess.Repository;
 using WebShop.DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Identity;
+using WebShop.Utility;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
 // Add DbContext as a service with connection string from appsettings.json
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+// This needs to be added because of Identity 
+builder.Services.AddRazorPages();
+
+// builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
 // Add Repository service
 // builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 
@@ -46,7 +53,8 @@ app.UseRouting();
 // This is something we will work on later
 app.UseAuthentication();
 app.UseAuthorization();
-
+// This needs to be added because of Identity 
+app.MapRazorPages();
 // Default route - if nothing is defined go to Home/Index/..
 app.MapControllerRoute(
     name: "default",
